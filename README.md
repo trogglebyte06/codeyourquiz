@@ -5,6 +5,7 @@ levels:
 1. Easy
 2. Medium
 3. Hard
+
 The user can select difficulty level by entering either a number 1,2,3 or typing
 out the word "Easy", "Medium", or "Hard" (case insensitive). User gets 3 tries.
 
