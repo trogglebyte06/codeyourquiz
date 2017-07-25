@@ -1,17 +1,17 @@
 import struct
 import platform
 import sys
+import random
 
 def tryCount(prompt, acceptable, tries, acceptableIdx):
     """
     tryCount()
-    input- variable type (int, str), input prompt, list of acceptable answers,
-    number of tries allowed
+    input- prompt(string), acceptable(list), tries(int), acceptableIdx(int)
 
-    output- user input in form type (str, int). If user input not compatible
-    with type or does not match acceptable, returns -1
+    output- returns 1 if correct answer is entered, -1 if incorrect answer is
+    entered more than tries times.
 
-    behavior- takes input, compares to acceptable answers, limts repeat attempts
+    behavior- gives the user tries chances to answer the question correctly.
     """
     user_attempt_count = 0
     while user_attempt_count < tries:
@@ -53,7 +53,7 @@ def terminalSize():
 def formatter(formatcontent):
     """
     formatter()
-    inputs- string to be formatted
+    inputs- formatcontent(string)
     outputs- string centered between banner of stars top, left, right, bottom
     behavior- formats provided list content within an attractive star banner
     """
@@ -91,7 +91,7 @@ def questionFormatter(content):
         if len(content) <= width:
             print content
             break
-        if content[width] == " ":
+        elif content[width] == " ":
             print content[:width]
             content = content[width+1:]
         else:
@@ -131,13 +131,15 @@ def quizMaterial(diffChoice):
 
 def skillLevel():
     """
-    menuMaker()
+    skillLevel()
 
-    input- contentList, a dictionary
+    input- none
 
-    output- diffListStr (the odd elements of contentList)
+    output- difficultyLevel (int)
 
-    behavior- prints element 0,1 on a line, prints element 2,3 on a line...
+    behavior- compares user entry to dictionary keys, returns value if possible
+    if not possible, randomly generates a number from 0 to 2 corresponding to
+    easy, medium, hard, and returns that number.
     """
 
     diffDictStr = {"easy":0, "medium":1, "hard":2}
@@ -147,7 +149,7 @@ def skillLevel():
             difficultylevel = diffDictStr[raw_input("please enter a difficulty level: ").lower()]
             break
         except KeyError:
-            difficultylevel = 0
+            difficultylevel = random.randint(0,2)
             print "try again. Enter easy, medium, or hard"
             loopEnder += 1
     return difficultylevel
@@ -158,19 +160,17 @@ def quizQuestionAttempts():
 
     input- None
 
-    output- number of tries per question selected by userTries
+    output- number of tries per question entered by user
 
     behavior- asks for number of tries, if invalid entry three times, defaults to 3
     """
-    defaultUserTries = 3
     questionFormatter("Choose amount of tries per question, from 1 to 10 tries.")
     try:
         userTries = int(raw_input("How many tries would you like per question? "))
         return userTries
-    except TypeError:
+    except ValueError:
         questionFormatter("Invalid response. Default number of tries is 3. Good luck!")
-        userTries = defaultUserTries
-        return userTries
+        return defaultUserTries
     questionFormatter("YOU HAVE "+str(userTries)+" CHANCES")
     return userTries
 
@@ -191,23 +191,21 @@ def quizEngine(userTries, Q):
         guess = tryCount(userPrompt, backofbook, userTries, answerIdx)
         if guess == wrong:
             Q = Q.replace("__"+str(quizProgress)+"__", backofbook[answerIdx].upper())
-            quizProgress += stepper
-            answerIdx += stepper
             fails += stepper
             questionFormatter("Out of tries... Onward!!")
         else:
-            questionFormatter("Great Job!")
             Q = Q.replace("__"+str(quizProgress)+"__", backofbook[answerIdx])
-            quizProgress += stepper
-            answerIdx += stepper
-    print Q
+            questionFormatter("Great Job!")
+        quizProgress += stepper
+        answerIdx += stepper
+    questionFormatter(Q)
     return fails
 
 def finalScore(total, totalMissed):
     """
-    inputs- total number of questions, total number of questions missed
+    inputs- total number of questions(int), total number of questions missed(int)
 
-    outputs- returns nothing, prints score and congratulation/consolation.
+    outputs- returns nothing, sends score and benediction to formatter() for printing.
 
     behavior- takes number of fails from quizEngine(), compares to number of questions
     in the quiz and calculates score.
@@ -231,11 +229,8 @@ defaultUserTries = 3
 
 difficulty = skillLevel()
 
-
 questions = quizMaterial(difficulty)
-intro = questions[0]
-backofbook = questions[1]
-questionTXT = questions[2]
+intro, backofbook, questionTXT = questions[0], questions[1], questions[2]
 
 formatter(intro)
 questionFormatter("FILL IN THE BLANK!")
